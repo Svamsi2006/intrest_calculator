@@ -44,7 +44,7 @@ End Date: Select the end date (defaults to the current date).
 
 Compound Interest: Toggle between simple and compound interest calculations.
 
-Calculate:
+## Calculate:
 Click the "Calculate Interest" button to view the results, including duration, interest, and total amount.
 
 View Calculation Steps:
@@ -61,9 +61,7 @@ Click "Print" to print the results.
 Example
 For a principal of ₹34400, rate of 2% per month, from 2025-03-27 to 2025-07-30 (4 months and 3 days), with simple interest:
 
-yaml
-Copy
-Edit
+
 Duration: 0 Years, 4 Months, 3 Days
 Interest: ₹2820.80
 Total Amount: ₹37220.80
@@ -85,7 +83,6 @@ CSS3: Custom styling with Tailwind CSS for responsive design and animations.
 
 JavaScript: Logic for calculations, language switching, and UI interactions.
 
-Tailwind CSS: CDN-hosted for styling.
 
 Fonts: Google Fonts (Manrope) for typography.
 
@@ -98,8 +95,5 @@ Language Support: Calculation steps are dynamically translated based on the sele
 
 License
 This project is owned by Vamsi Siva Ganesh Seelam. All rights reserved. For inquiries regarding usage or distribution, please contact the owner.
-
-Contact
-For feedback or issues, reach out to Vamsi Siva Ganesh Seelam at [insert contact information if available].
 
 
