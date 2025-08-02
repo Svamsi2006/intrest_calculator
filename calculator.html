@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Interest Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+        CSS Variables for Dark Theme
+        ======================================== */
+        :root {
+            --primary-color: #60A5FA;
+            --primary-color-dark: #3B82F6;
+            --secondary-color: #9CA3AF;
+            --background-color: #1F2937;
+            --container-bg: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-light: #6B7280;
+            --border-color: #4B5563;
+            --input-bg: #2D3748;
+            --accent-glow: rgba(96, 165, 250, 0.3);
+        }
+
+        /* ========================================
+        Base & Typography Styles
+        ======================================== */
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* ========================================
+        Animations
+        ======================================== */
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px var(--accent-glow); }
+            50% { box-shadow: 0 0 15px var(--accent-glow); }
+            100% { box-shadow: 0 0 5px var(--accent-glow); }
+        }
+
+        /* ========================================
+        Main Container & Header
+        ======================================== */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--container-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.5s ease-out;
+        }
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        h1 {
+            color: var(--text-primary);
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ========================================
+        Language Dropdown
+        ======================================== */
+        .language-switcher {
+            position: relative;
+        }
+        #lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #lang-btn:hover {
+            background-color: #4B5563;
+            transform: scale(1.05);
+        }
+        #lang-dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-10px);
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        }
+        #lang-dropdown.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+        .lang-option {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .lang-option:hover {
+            background-color: #4B5563;
+            color: var(--text-primary);
+        }
+
+        /* ========================================
+        Input Field Styles
+        ======================================== */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.75rem;
+            animation: slideIn 0.6s ease-out;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(15%);
+            color: var(--text-light);
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background-color: #2D3748;
+        }
+        input:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* ========================================
+        Custom Toggle Switch
+        ======================================== */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            animation: slideIn 0.7s ease-out;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 32px;
+            margin-left: auto;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #6B7280;
+            transition: all 0.4s ease;
+            border-radius: 32px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: all 0.4s ease;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-color);
+            animation: glowPulse 1.5s infinite;
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* ========================================
+        Buttons
+        ======================================== */
+        .button {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-color-dark));
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            animation: slideIn 0.8s ease-out;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+            background: linear-gradient(45deg, var(--primary-color-dark), var(--primary-color));
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px var(--accent-glow);
+        }
+        
+        .button-secondary {
+            background: var(--input-bg);
+            color: var(--text-secondary);
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            animation: slideIn 0.9s ease-out;
+        }
+        .button-secondary:hover {
+            background-color: #4B5563;
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+        Results & Calculation Steps Section
+        ======================================== */
+        .results {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed var(--border-color);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .results.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .results p {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        .results p:hover {
+            background-color: #2D3748;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        .results p span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+        .results p span:last-child {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+        .results-icon {
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+        .results p:hover .results-icon {
+            transform: scale(1.2);
+        }
+
+        #calculation-steps {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, padding 0.5s ease-out;
+        }
+        #calculation-steps.visible {
+            max-height: 1000px;
+            opacity: 1;
+            padding: 1.5rem;
+        }
+        #calculation-steps h3 {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        #calculation-steps p {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+        Action Buttons (Share/Print)
+        ======================================== */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .action-btn {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            background-color: #4B5563;
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+        Modal Styles
+        ======================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--container-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        .modal-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        #copy-feedback {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        textarea {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1 data-translate-key="title">Interest Calculator</h1>
+            <div class="language-switcher">
+                <button id="lang-btn">
+                    <span id="selected-lang-flag">🇬🇧</span>
+                    <span id="selected-lang-text">EN</span>
+                </button>
+                <div id="lang-dropdown">
+                    <div class="lang-option" data-lang="en">🇬🇧 English</div>
+                    <div class="lang-option" data-lang="te">🇮🇳 తెలుగు</div>
+                    <div class="lang-option" data-lang="ta">🇮🇳 தமிழ்</div>
+                    <div class="lang-option" data-lang="kn">🇮🇳 ಕನ್ನಡ</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="input-group" style="--i: 1">
+            <label for="principal" data-translate-key="principalLabel">Principal Amount</label>
+            <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.158-.103.346-.196.567-.267v1.698a2.5 2.5 0 00-.567-.267z" /><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.5 4.5 0 00-1.879 3.467l-1.423 1.423A3.5 3.5 0 0110 6.5c1.28 0 2.417.635 3.08 1.592l-1.423-1.423A4.5 4.5 0 0011 5.092V5zM10 13.5a3.5 3.5 0 01-3.08-1.592l1.423-1.423A2.5 2.5 0 0010 11.5c1.28 0 2.417-.635 3.08-1.592l-1.423-1.423A3.5 3.5 0 0110 13.5z" clip-rule="evenodd" /></svg>
+            </div>
+            <input type="number" id="principal" value="34400" required>
+        </div>
+
+        <div class="input-group" style="--i: 2">
+            <label for="rate" data-translate-key="rateLabel">Interest Per Month (per ₹100)</label>
+            <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" /></svg>
+            </div>
+            <input type="number" id="rate" value="2" required>
+        </div>
+
+        <div class="input-group" style="--i: 3">
+            <label for="startDate" data-translate-key="startDateLabel">Starting Date</label>
+            <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
+            </div>
+            <input type="date" id="startDate" value="2025-03-27" required>
+        </div>
+
+        <div class="input-group" style="--i: 4">
+            <label for="endDate" data-translate-key="endDateLabel">End Date</label>
+            <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
+            </div>
+            <input type="date" id="endDate" required>
+        </div>
+
+        <div class="toggle-container">
+            <label for="toggle" data-translate-key="compoundLabel">Compound Interest</label>
+            <label class="switch">
+                <input type="checkbox" id="toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="button" onclick="calculate()" data-translate-key="calculateBtn">Calculate Interest</button>
+        <button class="button-secondary" id="show-steps-btn" data-translate-key="showStepsBtn">Show Calculation Steps</button>
+
+        <div id="results" class="results">
+            <p id="duration">
+                <span data-translate-key="durationLabel"><svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Duration:</span> 
+                <span></span>
+            </p>
+            <p id="interest">
+                <span data-translate-key="interestLabel"><svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>Interest:</span> 
+                <span>₹0.00</span>
+            </p>
+            <p id="totalAmount">
+                <span data-translate-key="totalAmountLabel"><svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>Total Amount:</span> 
+                <span>₹0.00</span>
+            </p>
+            <div id="calculation-steps"></div>
+            <div class="action-buttons">
+                <button class="action-btn" id="share-btn" data-translate-key="shareBtn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>Share</button>
+                <button class="action-btn" id="print-btn" data-translate-key="printBtn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>Print</button>
+            </div>
+        </div>
+        <p class="note" data-translate-key="note">Transactions are not saved. Please record them manually.</p>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 data-translate-key="shareTitle">Share Calculation</h2>
+            <p data-translate-key="shareDesc">Copy the summary below to share your calculation results.</p>
+            <textarea id="share-text" rows="5" class="w-full p-2 border rounded-lg" readonly></textarea>
+            <button class="button w-full" id="copy-btn" data-translate-key="copyBtn">Copy to Clipboard</button>
+            <p id="copy-feedback" data-translate-key="copyFeedback">Copied!</p>
+        </div>
+    </div>
+
+    <script>
+    // ===========================================
+    // TRANSLATION DATA
+    // ===========================================
+    const translations = {
+        en: {
+            title: "Interest Calculator",
+            principalLabel: "Principal Amount",
+            rateLabel: "Interest Per Month (per ₹100)",
+            startDateLabel: "Starting Date",
+            endDateLabel: "End Date",
+            compoundLabel: "Compound Interest",
+            calculateBtn: "Calculate Interest",
+            showStepsBtn: "Show Calculation Steps",
+            hideStepsBtn: "Hide Calculation Steps",
+            stepsTitle: "Calculation Breakdown",
+            durationLabel: "Duration:",
+            interestLabel: "Interest:",
+            interestLabelSimple: "Interest (Simple):",
+            interestLabelCompound: "Interest (Compound):",
+            totalAmountLabel: "Total Amount:",
+            totalAmountLabelSimple: "Total Amount (Simple):",
+            totalAmountLabelCompound: "Total Amount (Compound):",
+            shareBtn: "Share",
+            printBtn: "Print",
+            note: "Transactions are not saved. Please record them manually.",
+            shareTitle: "Share Calculation",
+            shareDesc: "Copy the summary below to share your calculation results.",
+            copyBtn: "Copy to Clipboard",
+            copyFeedback: "Copied!",
+            step1Simple: "Monthly Interest = P * (rate/100) = {principal} * {rateDecimal} = ₹{monthlyInterest}",
+            step2Simple: "Interest for {fullMonths} full months = {monthlyInterest} * {fullMonths} = ₹{interestFullMonths}",
+            step3Simple: "Interest for {days} remaining days = ({monthlyInterest} / 30) * {days} = ₹{interestDays}",
+            step4Simple: "Total Simple Interest = ₹{interestFullMonths} + ₹{interestDays} = ₹{totalInterest}",
+            step1Compound: "Amount after {fullMonths} full months (Compounded):<br/>A = P(1+r)^t = {principal} * (1 + {rateDecimal})^{fullMonths} = ₹{compoundedAmount}",
+            step2Compound: "Simple interest for remaining {days} days on new amount:<br/>I = (New P * r / 30) * d = ({compoundedAmount} * {rateDecimal} / 30) * {days} = ₹{interestDays}",
+            step3Compound: "Total Amount = ₹{compoundedAmount} + ₹{interestDays} = ₹{totalAmount}"
+        },
+        te: {
+            title: "వడ్డీ కాలిక్యులేటర్",
+            principalLabel: "అసలు మొత్తం",
+            rateLabel: "నెలకి వడ్డీ (₹100 కి)",
+            startDateLabel: "ప్రారంభ తేదీ",
+            endDateLabel: "ముగింపు తేదీ",
+            compoundLabel: "చక్రవడ్డీ",
+            calculateBtn: "వడ్డీని లెక్కించండి",
+            showStepsBtn: "లెక్కింపు దశలను చూపించు",
+            hideStepsBtn: "లెక్కింపు దశలను దాచు",
+            stepsTitle: "లెక్కింపు విచ్ఛిన్నం",
+            durationLabel: "కాలపరిమితి:",
+            interestLabel: "వడ్డీ:",
+            interestLabelSimple: "సాధారణ వడ్డీ:",
+            interestLabelCompound: "చక్రవడ్డీ:",
+            totalAmountLabel: "మొత్తం:",
+            totalAmountLabelSimple: "మొత్తం (సాధారణ):",
+            totalAmountLabelCompound: "మొత్తం (చక్రవడ్డీ):",
+            shareBtn: "పంచుకోండి",
+            printBtn: "ముద్రించండి",
+            note: "లావాదేవీలు సేవ్ చేయబడవు. దయచేసి వాటిని మాన్యువల్‌గా రికార్డ్ చేయండి.",
+            shareTitle: "లెక్కింపును పంచుకోండి",
+            shareDesc: "మీ లెక్కింపు ఫలితాలను పంచుకోవడానికి దిగువ సారాంశాన్ని కాపీ చేయండి.",
+            copyBtn: "క్లిప్‌బోర్డ్‌కు కాపీ చేయండి",
+            copyFeedback: "కాపీ చేయబడింది!",
+            step1Simple: "నెలవారీ వడ్డీ = P * (రేటు/100) = {principal} * {rateDecimal} = ₹{monthlyInterest}",
+            step2Simple: "4 పూర్తి నెలలకు వడ్డీ = {monthlyInterest} * {fullMonths} = ₹{interestFullMonths}",
+            step3Simple: "మిగిలిన {days} రోజులకు వడ్డీ = ({monthlyInterest} / 30) * {days} = ₹{interestDays}",
+            step4Simple: "మొత్తం సాధారణ వడ్డీ = ₹{interestFullMonths} + ₹{interestDays} = ₹{totalInterest}",
+            step1Compound: "{fullMonths} పూర్తి నెలల తర్వాత మొత్తం (చక్రవడ్డీ):<br/>A = P(1+r)^t = {principal} * (1 + {rateDecimal})^{fullMonths} = ₹{compoundedAmount}",
+            step2Compound: "మిగిలిన {days} రోజులకు సాధారణ వడ్డీ:<br/>I = (కొత్త P * r / 30) * d = ({compoundedAmount} * {rateDecimal} / 30) * {days} = ₹{interestDays}",
+            step3Compound: "మొత్తం మొత్తం = ₹{compoundedAmount} + ₹{interestDays} = ₹{totalAmount}"
+        },
+        ta: {
+            title: "வட்டி கால்குலேட்டர்",
+            principalLabel: "அசல் தொகை",
+            rateLabel: "மாதத்திற்கான வட்டி (₹100 க்கு)",
+            startDateLabel: "தொடக்க தேதி",
+            endDateLabel: "முடிவு தேதி",
+            compoundLabel: "கூட்டு வட்டி",
+            calculateBtn: "வட்டியைக் கணக்கிடுங்கள்",
+            showStepsBtn: "கணக்கீடு படிகளைக் காட்டு",
+            hideStepsBtn: "கணக்கீடு படிகளை மறை",
+            stepsTitle: "கணக்கீடு முறிவு",
+            durationLabel: "கால அளவு:",
+            interestLabel: "வட்டி:",
+            interestLabelSimple: "எளிய வட்டி:",
+            interestLabelCompound: "கூட்டு வட்டி:",
+            totalAmountLabel: "மொத்த தொகை:",
+            totalAmountLabelSimple: "மொத்தம் (எளிய):",
+            totalAmountLabelCompound: "மொத்தம் (கூட்டு):",
+            shareBtn: "பகிரவும்",
+            printBtn: "அச்சிடுக",
+            note: "பரிவர்த்தனைகள் சேமிக்கப்படவில்லை. அவற்றை கைமுறையாக பதிவு செய்யவும்.",
+            shareTitle: "கணக்கீட்டைப் பகிரவும்",
+            shareDesc: "உங்கள் கணக்கீட்டு முடிவுகளைப் பகிர கீழே உள்ள சுருக்கத்தை நகலெடுக்கவும்.",
+            copyBtn: "கிளிப்போர்டுக்கு நகலெடு",
+            copyFeedback: "நகலெடுக்கப்பட்டது!",
+            step1Simple: "மாதாந்திர வட்டி = P * (விகிதம்/100) = {principal} * {rateDecimal} = ₹{monthlyInterest}",
+            step2Simple: "4 முழு மாதங்களுக்கான வட்டி = {monthlyInterest} * {fullMonths} = ₹{interestFullMonths}",
+            step3Simple: "மீதமுள்ள {days} நாட்களுக்கான வட்டி = ({monthlyInterest} / 30) * {days} = ₹{interestDays}",
+            step4Simple: "மொத்த எளிய வட்டி = ₹{interestFullMonths} + ₹{interestDays} = ₹{totalInterest}",
+            step1Compound: "{fullMonths} முழு மாதங்களுக்குப் பிறகு தொகை (கூட்டு):<br/>A = P(1+r)^t = {principal} * (1 + {rateDecimal})^{fullMonths} = ₹{compoundedAmount}",
+            step2Compound: "மீதமுள்ள {days} நாட்களுக்கு எளிய வட்டி:<br/>I = (புதிய P * r / 30) * d = ({compoundedAmount} * {rateDecimal} / 30) * {days} = ₹{interestDays}",
+            step3Compound: "மொத்த தொகை = ₹{compoundedAmount} + ₹{interestDays} = ₹{totalAmount}"
+        },
+        kn: {
+            title: "ಬಡ್ಡಿ ಕ್ಯಾಲ್ಕುಲೇಟರ್",
+            principalLabel: "ಅಸಲು ಮೊತ್ತ",
+            rateLabel: "ತಿಂಗಳ ಬಡ್ಡಿ (₹100 ಕ್ಕೆ)",
+            startDateLabel: "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
+            endDateLabel: "ಮುಕ್ತಾಯ ದಿನಾಂಕ",
+            compoundLabel: "ಚಕ್ರಬಡ್ಡಿ",
+            calculateBtn: "ಬಡ್ಡಿಯನ್ನು ಲೆಕ್ಕಾಚಾರ ಮಾಡಿ",
+            showStepsBtn: "ಲೆಕ್ಕಾಚಾರದ ಹಂತಗಳನ್ನು ತೋರಿಸಿ",
+            hideStepsBtn: "ಲೆಕ್ಕಾಚಾರದ ಹಂತಗಳನ್ನು ಮರೆಮಾಡಿ",
+            stepsTitle: "ಲೆಕ್ಕಾಚಾರದ ವಿಭಜನೆ",
+            durationLabel: "ಅವಧಿ:",
+            interestLabel: "ಬಡ್ಡಿ:",
+            interestLabelSimple: "ಸರಳ ಬಡ್ಡಿ:",
+            interestLabelCompound: "ಚಕ್ರಬಡ್ಡಿ:",
+            totalAmountLabel: "ಒಟ್ಟು ಮೊತ್ತ:",
+            totalAmountLabelSimple: "ಒಟ್ಟು (ಸರಳ):",
+            totalAmountLabelCompound: "ಒಟ್ಟು (ಚಕ್ರಬಡ್ಡಿ):",
+            shareBtn: "ಹಂಚಿಕೊಳ್ಳಿ",
+            printBtn: "ಮುದ್ರಿಸಿ",
+            note: "ವಹಿವಾಟುಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಅವುಗಳನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ದಾಖಲಿಸಿ.",
+            shareTitle: "ಲೆಕ್ಕಾಚಾರವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+            shareDesc: "ನಿಮ್ಮ ಲೆಕ್ಕಾಚಾರದ ಫಲಿತಾಂಶಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಕೆಳಗಿನ ಸಾರಾಂಶವನ್ನು ನಕಲಿಸಿ.",
+            copyBtn: "ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಿ",
+            copyFeedback: "ನಕಲಿಸಲಾಗಿದೆ!",
+            step1Simple: "ಮಾಸಿಕ ಬಡ್ಡಿ = P * (ದರ/100) = {principal} * {rateDecimal} = ₹{monthlyInterest}",
+            step2Simple: "4 ಪೂರ್ಣ ತಿಂಗಳುಗಳಿಗೆ ಬಡ್ಡಿ = {monthlyInterest} * {fullMonths} = ₹{interestFullMonths}",
+            step3Simple: "ಉಳಿದ {days} ದಿನಗಳಿಗೆ ಬಡ್ಡಿ = ({monthlyInterest} / 30) * {days} = ₹{interestDays}",
+            step4Simple: "ಒಟ್ಟು ಸರಳ ಬಡ್ಡಿ = ₹{interestFullMonths} + ₹{interestDays} = ₹{totalInterest}",
+            step1Compound: "{fullMonths} ಪೂರ್ಣ ತಿಂಗಳುಗಳ ನಂತರ ಮೊತ್ತ (ಚಕ್ರಬಡ್ಡಿ):<br/>A = P(1+r)^t = {principal} * (1 + {rateDecimal})^{fullMonths} = ₹{compoundedAmount}",
+            step2Compound: "ಉಳಿದ {days} ದಿನಗಳಿಗೆ ಸರಳ ಬಡ್ಡಿ:<br/>I = (ಹೊಸ P * r / 30) * d = ({compoundedAmount} * {rateDecimal} / 30) * {days} = ₹{interestDays}",
+            step3Compound: "ಒಟ್ಟು ಮೊತ್ತ = ₹{compoundedAmount} + ₹{interestDays} = ₹{totalAmount}"
+        }
+    };
+
+    // ===========================================
+    // Global State
+    // ===========================================
+    let lastCalculationDetails = {};
+
+    // ===========================================
+    // DOM Element References
+    // ===========================================
+    const principalInput = document.getElementById('principal');
+    const rateInput = document.getElementById('rate');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const toggleInput = document.getElementById('toggle');
+    const langBtn = document.getElementById('lang-btn');
+    const langDropdown = document.getElementById('lang-dropdown');
+    const shareBtn = document.getElementById('share-btn');
+    const printBtn = document.getElementById('print-btn');
+    const shareModal = document.getElementById('share-modal');
+    const copyBtn = document.getElementById('copy-btn');
+    const showStepsBtn = document.getElementById('show-steps-btn');
+    const calculationStepsEl = document.getElementById('calculation-steps');
+
+    // ===========================================
+    // Core Functions
+    // ===========================================
+
+    function setLanguage(lang) {
+        if (!translations[lang]) return;
+        localStorage.setItem('calculator_language', lang);
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.dataset.translateKey;
+            if (translations[lang][key]) {
+                el.innerText = translations[lang][key];
+            }
+        });
+        const langData = { en: '🇬🇧 EN', te: '🇮🇳 TE', ta: '🇮🇳 TA', kn: '🇮🇳 KN' };
+        const [flag, code] = langData[lang].split(' ');
+        document.getElementById('selected-lang-flag').innerText = flag;
+        document.getElementById('selected-lang-text').innerText = code;
+        calculate();
+    }
+
+    function calculateDuration(d1, d2) {
+        const date1 = new Date(Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate()));
+        const date2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
+        let years = date2.getUTCFullYear() - date1.getUTCFullYear();
+        let months = date2.getUTCMonth() - date1.getUTCMonth();
+        let days = date2.getUTCDate() - date1.getUTCDate();
+        if (days < 0) {
+            months--;
+            const lastDayOfPrevMonth = new Date(date2.getUTCFullYear(), date2.getUTCMonth(), 0).getUTCDate();
+            days += lastDayOfPrevMonth;
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        return { years, months, days };
+    }
+
+    function calculate() {
+        const principal = parseFloat(principalInput.value);
+        const ratePer100 = parseFloat(rateInput.value);
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        
+        calculationStepsEl.classList.remove('visible');
+        
+        if (isNaN(principal) || isNaN(ratePer100) || !startDate.getTime() || !endDate.getTime() || endDate < startDate) {
+            document.getElementById('results').classList.remove('visible');
+            return;
+        }
+
+        const { years, months, days } = calculateDuration(startDate, endDate);
+        const currentLang = localStorage.getItem('calculator_language') || 'en';
+        
+        let durationText = "";
+        if(currentLang === 'en') durationText = `${years} Years ${months} Months ${days} Days`;
+        else if(currentLang === 'te') durationText = `${years} సం ${months} నె ${days} రో`;
+        else if(currentLang === 'ta') durationText = `${years} வரு ${months} மாத ${days} நா`;
+        else if(currentLang === 'kn') durationText = `${years} ವರ್ಷ ${months} ತಿಂಗಳು ${days} ದಿನ`;
+
+        document.querySelector('#duration span:last-child').innerText = durationText;
+
+        const isCompound = toggleInput.checked;
+        const rateDecimal = ratePer100 / 100;
+        let finalInterest = 0;
+        let finalTotalAmount = 0;
+        
+        lastCalculationDetails = { principal, ratePer100, years, months, days, isCompound };
+        
+        if (isCompound) {
+            const fullMonths = years * 12 + months;
+            let compoundedAmountAfterMonths = principal * Math.pow((1 + rateDecimal), fullMonths);
+            const dailyInterestOnCompounded = (compoundedAmountAfterMonths * rateDecimal) / 30;
+            const interestForDays = dailyInterestOnCompounded * days;
+            finalTotalAmount = compoundedAmountAfterMonths + interestForDays;
+            finalInterest = finalTotalAmount - principal;
+            document.querySelector('#interest span:first-child').innerHTML = `<svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>${translations[currentLang].interestLabelCompound}`;
+            document.querySelector('#totalAmount span:first-child').innerHTML = `<svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>${translations[currentLang].totalAmountLabelCompound}`;
+        } else {
+            const interestPerMonth = rateDecimal * principal;
+            const fullMonths = years * 12 + months;
+            const interestForFullMonths = interestPerMonth * fullMonths;
+            const interestForDays = (interestPerMonth / 30) * days;
+            finalInterest = interestForFullMonths + interestForDays;
+            finalTotalAmount = principal + finalInterest;
+            document.querySelector('#interest span:first-child').innerHTML = `<svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>${translations[currentLang].interestLabelSimple}`;
+            document.querySelector('#totalAmount span:first-child').innerHTML = `<svg class="h-6 w-6 results-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>${translations[currentLang].totalAmountLabelSimple}`;
+        }
+        
+        document.querySelector('#interest span:last-child').innerText = `₹${finalInterest.toFixed(2)}`;
+        document.querySelector('#totalAmount span:last-child').innerText = `₹${finalTotalAmount.toFixed(2)}`;
+        document.getElementById('results').classList.add('visible');
+    }
+
+    function generateAndShowSteps() {
+        const { principal, ratePer100, years, months, days, isCompound } = lastCalculationDetails;
+        const currentLang = localStorage.getItem('calculator_language') || 'en';
+        let stepsHtml = `<h3>${translations[currentLang].stepsTitle}</h3>`;
+        const rateDecimal = ratePer100 / 100;
+
+        if (isCompound) {
+            const fullMonths = years * 12 + months;
+            let compoundedAmountAfterMonths = principal * Math.pow((1 + rateDecimal), fullMonths);
+            const dailyInterestOnCompounded = (compoundedAmountAfterMonths * rateDecimal) / 30;
+            const interestForDays = dailyInterestOnCompounded * days;
+            
+            stepsHtml += `<p>${translations[currentLang].step1Compound
+                .replace('{fullMonths}', fullMonths)
+                .replace('{principal}', principal)
+                .replace('{rateDecimal}', rateDecimal)
+                .replace('{compoundedAmount}', compoundedAmountAfterMonths.toFixed(2))}</p>`;
+            stepsHtml += `<p>${translations[currentLang].step2Compound
+                .replace('{days}', days)
+                .replace('{compoundedAmount}', compoundedAmountAfterMonths.toFixed(2))
+                .replace('{rateDecimal}', rateDecimal)
+                .replace('{interestDays}', interestForDays.toFixed(2))}</p>`;
+            stepsHtml += `<p>${translations[currentLang].step3Compound
+                .replace('{compoundedAmount}', compoundedAmountAfterMonths.toFixed(2))
+                .replace('{interestDays}', interestForDays.toFixed(2))
+                .replace('{totalAmount}', (compoundedAmountAfterMonths + interestForDays).toFixed(2))}</p>`;
+        } else {
+            const interestPerMonth = rateDecimal * principal;
+            const fullMonths = years * 12 + months;
+            const interestForFullMonths = interestPerMonth * fullMonths;
+            const interestForDays = (interestPerMonth / 30) * days;
+
+            stepsHtml += `<p>${translations[currentLang].step1Simple
+                .replace('{principal}', principal)
+                .replace('{rateDecimal}', rateDecimal)
+                .replace('{monthlyInterest}', interestPerMonth.toFixed(2))}</p>`;
+            stepsHtml += `<p>${translations[currentLang].step2Simple
+                .replace('{fullMonths}', fullMonths)
+                .replace('{monthlyInterest}', interestPerMonth.toFixed(2))
+                .replace('{interestFullMonths}', interestForFullMonths.toFixed(2))}</p>`;
+            stepsHtml += `<p>${translations[currentLang].step3Simple
+                .replace('{days}', days)
+                .replace('{monthlyInterest}', interestPerMonth.toFixed(2))
+                .replace('{interestDays}', interestForDays.toFixed(2))}</p>`;
+            stepsHtml += `<p>${translations[currentLang].step4Simple
+                .replace('{interestFullMonths}', interestForFullMonths.toFixed(2))
+                .replace('{interestDays}', interestForDays.toFixed(2))
+                .replace('{totalInterest}', (interestForFullMonths + interestForDays).toFixed(2))}</p>`;
+        }
+        
+        calculationStepsEl.innerHTML = stepsHtml;
+        calculationStepsEl.classList.add('visible');
+    }
+    
+    // ===========================================
+    // Event Listeners
+    // ===========================================
+    function setupEventListeners() {
+        [principalInput, rateInput, startDateInput, endDateInput, toggleInput].forEach(el => {
+            el.addEventListener('input', calculate);
+            el.addEventListener('change', calculate);
+        });
+
+        langBtn.addEventListener('click', () => langDropdown.classList.toggle('visible'));
+        document.addEventListener('click', (e) => {
+            if (!langBtn.contains(e.target) && !langDropdown.contains(e.target)) {
+                langDropdown.classList.remove('visible');
+            }
+        });
+        document.querySelectorAll('.lang-option').forEach(el => {
+            el.addEventListener('click', () => {
+                setLanguage(el.dataset.lang);
+                langDropdown.classList.remove('visible');
+            });
+        });
+
+        showStepsBtn.addEventListener('click', () => {
+            const isVisible = calculationStepsEl.classList.toggle('visible');
+            const currentLang = localStorage.getItem('calculator_language') || 'en';
+            if (isVisible) {
+                generateAndShowSteps();
+                showStepsBtn.innerText = translations[currentLang].hideStepsBtn;
+            } else {
+                showStepsBtn.innerText = translations[currentLang].showStepsBtn;
+            }
+        });
+
+        printBtn.addEventListener('click', () => window.print());
+        shareBtn.addEventListener('click', () => {
+            const summary = `Interest Calculation Summary:
+- Principal: ₹${principalInput.value}
+- Rate: ${rateInput.value}% per month
+- From: ${startDateInput.value} To: ${endDateInput.value}
+- Duration: ${document.querySelector('#duration span:last-child').innerText}
+- Interest: ${document.querySelector('#interest span:last-child').innerText}
+- Total Amount: ${document.querySelector('#totalAmount span:last-child').innerText}`;
+            document.getElementById('share-text').value = summary;
+            shareModal.classList.add('visible');
+        });
+        
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal) shareModal.classList.remove('visible');
+        });
+        copyBtn.addEventListener('click', () => {
+            const shareText = document.getElementById('share-text');
+            shareText.select();
+            document.execCommand('copy');
+            const feedback = document.getElementById('copy-feedback');
+            feedback.style.opacity = 1;
+            setTimeout(() => {
+                feedback.style.opacity = 0;
+                setTimeout(() => shareModal.classList.remove('visible'), 300);
+            }, 1200);
+        });
+    }
+
+    // ===========================================
+    // Initial Setup on Page Load
+    // ===========================================
+    window.onload = () => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        endDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+        const savedLang = localStorage.getItem('calculator_language') || 'en';
+        setLanguage(savedLang);
+        setupEventListeners();
+        calculate();
+    };
+    </script>
+</body>
+</html>
