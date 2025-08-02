@@ -25,6 +25,7 @@ Since this is a web-based application, no server-side setup is required. Follow 
 
 ```bash
 git clone <repository-url>
+```
 Open the Application
 Open the index.html file in a modern web browser (e.g., Chrome, Firefox, Edge).
 
