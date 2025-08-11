@@ -2,6 +2,9 @@
 
 **Owner:** Vamsi Siva Ganesh Seelam
 
+
+##try the website
+https://svamsi2006.github.io/intrest_calculator/
 ## Overview
 
 The **Interest Calculator** is a web-based application designed to calculate simple and compound interest based on user inputs. It supports multiple languages (English, Telugu, Tamil, and Kannada) and features a modern, dark-themed user interface with smooth animations. Users can input the principal amount, interest rate per month (per ₹100), start and end dates, and choose between simple or compound interest calculations. The application displays results, including duration, interest, and total amount, and provides detailed calculation steps in the selected language.
